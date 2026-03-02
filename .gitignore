@@ -7,3 +7,7 @@ yarn-error.log*
 .env
 .idea/
 .vscode/
+
+# Ignore dynamically downloaded TTS binaries and data
+robot-widget/piper/
+robot-widget/assets/tts_output.wav

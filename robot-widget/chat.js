@@ -1,39 +1,28 @@
+const { ipcRenderer } = window.require('electron');
+const fs = window.require('fs');
+const path = window.require('path');
 const input = document.getElementById('chat-input');
 const btn = document.getElementById('send-btn');
 const messages = document.getElementById('messages');
 
-const responses = [
-  "Affirmative. Processing your request now.",
-  "My sensors indicate that information is correct.",
-  "I am currently optimizing local algorithms.",
-  "Negative. That action violates my core directives.",
-  "Scanning environment... All systems nominal.",
-  "I am a worker robot, not a philosopher.",
-  "Command acknowledged. Executing background tasks.",
-  "Danger! Just kidding, everything is fine.",
-  "Please wait while I consult the mainframe.",
-  "Energy reserves are optimal. Ready to proceed.",
-  "I have calculated the odds, and they are in our favor.",
-  "Task added to my queue. I will process it shortly."
-];
+// The responses array is obsolete - we now use Grok.
 
-let currentAudio = null;
+let currentAudio = new window.Audio();
+let audioUnlocked = false;
 
-function speak(text) {
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
-  }
-  
+async function speak(text) {
   try {
-    const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=${encodeURIComponent(text)}`;
-    currentAudio = new Audio(url);
-    
-    // Play the external fallback fast to sound more robotic
-    currentAudio.playbackRate = 1.25; 
-    currentAudio.play().catch(e => console.error("Audio playback blocked:", e));
+    const audioPath = await ipcRenderer.invoke('generate-speech', text);
+    if (audioPath) {
+        const fullPath = path.resolve(__dirname, audioPath);
+        const buffer = fs.readFileSync(fullPath);
+        const base64 = buffer.toString('base64');
+        currentAudio.src = 'data:audio/wav;base64,' + base64;
+        currentAudio.playbackRate = 1.0; 
+        currentAudio.play().catch(e => console.error("Audio block reasoning:", e.name, e.message));
+    }
   } catch(e) {
-    console.error("Failed to fetch TTS audio fallback", e);
+    console.error("Failed to fetch Piper TTS audio", e);
   }
 }
 
@@ -45,7 +34,13 @@ function addMessage(text, sender) {
   messages.scrollTop = messages.scrollHeight; // Auto-scroll to latest
 }
 
-function handleSend() {
+async function handleSend() {
+  if (!audioUnlocked) {
+      currentAudio.play().catch(()=>{});
+      currentAudio.pause();
+      audioUnlocked = true;
+  }
+
   const text = input.value.trim();
   if (!text) return;
   
@@ -53,12 +48,20 @@ function handleSend() {
   addMessage(text, 'user');
   input.value = '';
   
-  // 2. Add Bot Response after a small delay to simulate processing
-  setTimeout(() => {
-    const response = responses[Math.floor(Math.random() * responses.length)];
-    addMessage(response, 'bot');
-    speak(response);
-  }, 400);
+  // 2. Add Bot Response after simulated loading
+  const loadingDiv = document.createElement('div');
+  loadingDiv.className = `msg bot`;
+  loadingDiv.textContent = "Processing...";
+  messages.appendChild(loadingDiv);
+  messages.scrollTop = messages.scrollHeight;
+  
+  try {
+      const response = await ipcRenderer.invoke('ask-grok', text);
+      loadingDiv.textContent = response;
+      speak(response);
+  } catch(e) {
+      loadingDiv.textContent = "Error connecting to AI Mainframe.";
+  }
 }
 
 btn.addEventListener('click', handleSend);

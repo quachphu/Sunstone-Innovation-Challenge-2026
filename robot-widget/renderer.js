@@ -10,6 +10,8 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 // Electron Native Modules
 const { ipcRenderer } = window.require('electron');
+const fs = window.require('fs');
+const path = window.require('path');
 
 let isDragging = false;
 
@@ -309,17 +311,22 @@ animate();
 let currentAudio = null;
 let recognizer = null;
 
-function speak(text) {
+async function speak(text) {
   if (currentAudio) {
     currentAudio.pause();
     currentAudio.currentTime = 0;
   }
   try {
-    const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=en&client=tw-ob&q=${encodeURIComponent(text)}`;
-    currentAudio = new Audio(url);
-    currentAudio.playbackRate = 1.25; 
-    currentAudio.play().catch(e => console.error("Audio playback blocked", e));
-  } catch(e) { console.error("TTS Fallback failed", e); }
+    const audioPath = await ipcRenderer.invoke('generate-speech', text);
+    if (audioPath) {
+      const fullPath = path.resolve(__dirname, audioPath);
+      const buffer = fs.readFileSync(fullPath);
+      const base64 = buffer.toString('base64');
+      currentAudio = new Audio('data:audio/wav;base64,' + base64);
+      currentAudio.playbackRate = 1.0; 
+      currentAudio.play().catch(e => console.error("Audio block reasoning:", e.name, e.message));
+    }
+  } catch(e) { console.error("TTS Piper failed", e); }
 }
 
 const robotResponses = [
@@ -347,10 +354,23 @@ listeningSymbol.style.display = 'none';
 listeningSymbol.style.textShadow = '0 0 5px #0ff';
 document.body.appendChild(listeningSymbol);
 
+let uiLogElement = null;
 function uiLog(msg) {
+    if (!uiLogElement) {
+        uiLogElement = document.createElement('div');
+        uiLogElement.id = 'ui-log';
+        uiLogElement.style.position = 'absolute';
+        uiLogElement.style.bottom = '10px';
+        uiLogElement.style.left = '10px';
+        uiLogElement.style.color = '#0f0';
+        uiLogElement.style.fontFamily = 'monospace';
+        uiLogElement.style.fontSize = '12px';
+        uiLogElement.style.whiteSpace = 'pre';
+        uiLogElement.style.pointerEvents = 'none';
+        document.body.appendChild(uiLogElement);
+    }
+    uiLogElement.innerText = msg;
     console.log(msg);
-    const dbg = document.getElementById('debug');
-    if (dbg) dbg.innerText = msg;
 }
 
 async function initOfflineVoice() {
@@ -400,10 +420,9 @@ async function initOfflineVoice() {
                 let cmd = text.substring(wakeMatch.index + wakeMatch[0].length).trim();
                 
                 if (!cmd || cmd.length === 0) {
-                    speak("Hi, how can I help you?");
+                    speak("Nova is online. Processing initialized.");
                 } else {
-                    const response = robotResponses[Math.floor(Math.random() * robotResponses.length)];
-                    speak(response);
+                    ipcRenderer.invoke('ask-grok', cmd).then(resp => speak(resp));
                 }
             } else if (text === "hey" || text === "hi") {
                 speak("I am listening.");
@@ -442,7 +461,7 @@ async function initOfflineVoice() {
                         if (Math.abs(data[i]) > maxVol) maxVol = Math.abs(data[i]);
                     }
                     const bars = '|'.repeat(Math.min(20, Math.floor(maxVol * 100)));
-                    document.getElementById('ui-log').innerText = `🎙️ Engine Active!\nVol: [${bars.padEnd(20, ' ')}]`;
+                    uiLog(`🎙️ Engine Active!\nVol: [${bars.padEnd(20, ' ')}]`);
                 }
             } catch (error) { console.error('acceptWaveform error:', error); }
         };

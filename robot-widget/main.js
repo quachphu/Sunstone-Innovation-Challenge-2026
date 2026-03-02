@@ -1,5 +1,10 @@
 const { app, BrowserWindow, screen, protocol, ipcMain } = require('electron');
 const path = require('path');
+const { generateSpeech } = require('./tts.js');
+const { askGrok } = require('./grok.js');
+
+// Terminate Chromium's Autoplay sandbox. We are a desktop app, not a website!
+app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
 
 protocol.registerSchemesAsPrivileged([
   { scheme: 'appassets', privileges: { standard: true, supportFetchAPI: true, secure: true, bypassCSP: true } }
@@ -110,6 +115,20 @@ ipcMain.on('open-chat', () => {
   createChatWindow();
 });
 
+ipcMain.handle('ask-grok', async (event, text) => {
+    return await askGrok(text);
+});
+
+ipcMain.handle('generate-speech', async (event, text) => {
+    try {
+        const outPath = await generateSpeech(text, 'assets/tts_output.wav');
+        return outPath;
+    } catch (e) {
+        console.error("TTS Handle Error:", e);
+        return null;
+    }
+});
+
 app.whenReady().then(() => {
   const { session } = require('electron');
   session.defaultSession.setPermissionCheckHandler(() => true);
@@ -130,6 +149,7 @@ app.whenReady().then(() => {
       const data = fs.readFileSync(absolutePath);
       let contentType = 'application/octet-stream';
       if (absolutePath.endsWith('.gltf')) contentType = 'application/json';
+      else if (absolutePath.endsWith('.wav')) contentType = 'audio/wav';
       else if (absolutePath.endsWith('.jpeg') || absolutePath.endsWith('.jpg')) contentType = 'image/jpeg';
       else if (absolutePath.endsWith('.png')) contentType = 'image/png';
       
