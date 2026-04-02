@@ -4,7 +4,7 @@
  */
 
 import * as THREE from 'three';
-import { GLTFLoader }  from 'three/addons/loaders/GLTFLoader.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
@@ -38,20 +38,20 @@ window.novaVoice = {
 };
 
 window.addEventListener('mousedown', (e) => {
-  if (e.button === 0) {
-    isDragging = true;
-    ipcRenderer.send('drag-start', { x: e.screenX, y: e.screenY });
-  }
+    if (e.button === 0) {
+        isDragging = true;
+        ipcRenderer.send('drag-start', { x: e.screenX, y: e.screenY });
+    }
 });
 
 window.addEventListener('mousemove', (e) => {
-  if (isDragging) {
-    ipcRenderer.send('drag-move', { x: e.screenX, y: e.screenY });
-  }
+    if (isDragging) {
+        ipcRenderer.send('drag-move', { x: e.screenX, y: e.screenY });
+    }
 });
 
 window.addEventListener('mouseup', () => {
-  isDragging = false;
+    isDragging = false;
 });
 
 // Raycaster for precise 3D model clicking
@@ -59,37 +59,37 @@ const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
 window.addEventListener('dblclick', (event) => {
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-  raycaster.setFromCamera(mouse, camera);
+    raycaster.setFromCamera(mouse, camera);
 
-  if (typeof robotGroup !== 'undefined' && robotGroup) {
-    const intersects = raycaster.intersectObject(robotGroup, true);
-    // Ensure we only trigger if we hit a VISIBLE part of the robot (ignoring the hidden wall/ground)
-    const validIntersects = intersects.filter(hit => hit.object && hit.object.visible);
-    
-    if (validIntersects.length > 0) {
-      ipcRenderer.send('open-chat');
+    if (typeof robotGroup !== 'undefined' && robotGroup) {
+        const intersects = raycaster.intersectObject(robotGroup, true);
+        // Ensure we only trigger if we hit a VISIBLE part of the robot (ignoring the hidden wall/ground)
+        const validIntersects = intersects.filter(hit => hit.object && hit.object.visible);
+
+        if (validIntersects.length > 0) {
+            ipcRenderer.send('open-chat');
+        }
     }
-  }
 });
 
 // ── Canvas & Renderer ──────────────────────────────────────────────────────
 const canvas = document.getElementById('canvas');
 
 const renderer = new THREE.WebGLRenderer({
-  canvas,
-  alpha:     true,
-  antialias: true,
-  powerPreference: 'high-performance',
+    canvas,
+    alpha: true,
+    antialias: true,
+    powerPreference: 'high-performance',
 });
 renderer.setClearColor(0x000000, 0);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type    = THREE.PCFSoftShadowMap;
-renderer.toneMapping       = THREE.ACESFilmicToneMapping;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 
 const pmremGenerator = new THREE.PMREMGenerator(renderer);
@@ -101,10 +101,10 @@ scene.environment = pmremGenerator.fromScene(new RoomEnvironment(), 0.04).textur
 
 // ── Camera ─────────────────────────────────────────────────────────────────
 const camera = new THREE.PerspectiveCamera(
-  45,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  100
+    45,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    100
 );
 camera.position.set(0, 0.5, 3.5);
 camera.lookAt(0, 0, 0);
@@ -120,7 +120,7 @@ keyLight.position.set(3, 6, 4);
 keyLight.castShadow = true;
 keyLight.shadow.mapSize.set(1024, 1024);
 keyLight.shadow.camera.near = 0.5;
-keyLight.shadow.camera.far  = 30;
+keyLight.shadow.camera.far = 30;
 scene.add(keyLight);
 
 // Fill light (cool blue)
@@ -140,12 +140,12 @@ const cube = new THREE.Mesh(geometry, material);
 cube.position.set(1.5, 0.5, 0);
 scene.add(cube);
 
-window.onerror = function(msg, url, line, col, error) {
-  console.error("Window Error: ", msg, url, line, col, error);
+window.onerror = function (msg, url, line, col, error) {
+    console.error("Window Error: ", msg, url, line, col, error);
 };
 
-window.addEventListener('unhandledrejection', function(event) {
-  console.error('Unhandled Rejection: ', event.reason);
+window.addEventListener('unhandledrejection', function (event) {
+    console.error('Unhandled Rejection: ', event.reason);
 });
 
 // ── GLTF Loader ────────────────────────────────────────────────────────────
@@ -176,120 +176,120 @@ const loader = new GLTFLoader();
 loader.setDRACOLoader(dracoLoader);
 
 loader.load(
-  MODEL_URL,
-  (gltf) => {
-    const model = gltf.scene;
+    MODEL_URL,
+    (gltf) => {
+        const model = gltf.scene;
 
-    // Reset any wild transforms
-    model.position.set(0, 0, 0);
-    model.scale.set(1, 1, 1);
+        // Reset any wild transforms
+        model.position.set(0, 0, 0);
+        model.scale.set(1, 1, 1);
 
-    // Hide unwanted diorama meshes and update materials
-    model.traverse((child) => {
-      if (child.isMesh) {
-        const nodeName = child.name.toLowerCase();
-        const matName = child.material ? child.material.name.toLowerCase() : '';
+        // Hide unwanted diorama meshes and update materials
+        model.traverse((child) => {
+            if (child.isMesh) {
+                const nodeName = child.name.toLowerCase();
+                const matName = child.material ? child.material.name.toLowerCase() : '';
 
-        // Remove wall / ground meshes by node name OR material name
-        if (nodeName.includes("wall") || nodeName.includes("ground") || nodeName.includes("background") ||
-            matName.includes("wall") || matName.includes("ground") || matName.includes("background")) {
-          child.visible = false;
+                // Remove wall / ground meshes by node name OR material name
+                if (nodeName.includes("wall") || nodeName.includes("ground") || nodeName.includes("background") ||
+                    matName.includes("wall") || matName.includes("ground") || matName.includes("background")) {
+                    child.visible = false;
+                } else {
+                    child.castShadow = false;
+                    child.receiveShadow = false;
+                }
+
+                // Make sure textures render correctly
+                if (child.material) {
+                    child.material.needsUpdate = true;
+                    child.material.envMapIntensity = 1.0;
+                    if (child.material.metalness !== undefined) {
+                        child.material.metalness = 0.5;
+                    }
+                }
+            }
+        });
+
+        // Compute bounding box ONLY for visible meshes
+        const box = new THREE.Box3();
+        model.traverse((child) => {
+            if (child.isMesh && child.visible) {
+                box.expandByObject(child);
+            }
+        });
+
+        let size = new THREE.Vector3();
+        let center = new THREE.Vector3();
+
+        // Fallback if no meshes are visible
+        if (box.isEmpty()) {
+            size.set(2, 2, 2);
+            center.set(0, 0, 0);
         } else {
-          child.castShadow = false;
-          child.receiveShadow = false;
+            box.getSize(size);
+            box.getCenter(center);
         }
 
-        // Make sure textures render correctly
-        if (child.material) {
-          child.material.needsUpdate = true;
-          child.material.envMapIntensity = 1.0;
-          if (child.material.metalness !== undefined) {
-             child.material.metalness = 0.5;
-          }
+        // Auto-frame camera mathematically
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const fov = camera.fov * (Math.PI / 180);
+        // Increase padding from 1.5 to 2.2 to make the robot appear smaller within the window
+        let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2)) * 2.2;
+
+        console.log("✅ Bounding Box Computed:", { size, center, maxDim, cameraZ });
+
+        // Shift model so its true center is (0,0,0) BEFORE putting it in a group
+        model.position.sub(center);
+
+        // Place camera relative to the newly centered origin
+        camera.position.set(0, (size.y * 0.2), cameraZ);
+        camera.lookAt(0, 0, 0);
+
+        // Adjust lights to encompass the visible model at origin
+        keyLight.position.set(maxDim, maxDim, maxDim);
+        keyLight.castShadow = false;
+        rimLight.position.set(-maxDim, maxDim, -maxDim);
+
+        robotGroup = new THREE.Group();
+        robotGroup.add(model);
+
+        // Rotate the robot a bit to the left (facing left side of screen)
+        robotGroup.rotation.y = -0.5; // ~ -30 degrees
+
+        scene.add(robotGroup);
+
+        // Save references to specific robot parts for procedural idle animation
+        headNode = model.getObjectByName('Head_13') || model.getObjectByName('Head Rotate_14');
+        bodyNode = model.getObjectByName('Robot_Main_Controller_40') || model.getObjectByName('Body_25') || model;
+        armRNode = model.getObjectByName('Arm_1_Right_26') || model.getObjectByName('Arm 1 Right_26');
+        armLNode = model.getObjectByName('Arm_1_Left_35') || model.getObjectByName('Arm 1 Left_35');
+
+        // Store their resting poses so we don't snap them into the sky or fold them backward!
+        if (headNode) headInitRot = headNode.rotation.clone();
+        if (bodyNode) {
+            bodyInitPos = bodyNode.position.clone();
+            bodyInitRot = bodyNode.rotation.clone();
         }
-      }
-    });
+        if (armRNode) armRInitRot = armRNode.rotation.clone();
+        if (armLNode) armLInitRot = armLNode.rotation.clone();
 
-    // Compute bounding box ONLY for visible meshes
-    const box = new THREE.Box3();
-    model.traverse((child) => {
-      if (child.isMesh && child.visible) {
-        box.expandByObject(child);
-      }
-    });
-
-    let size = new THREE.Vector3();
-    let center = new THREE.Vector3();
-    
-    // Fallback if no meshes are visible
-    if (box.isEmpty()) {
-       size.set(2, 2, 2);
-       center.set(0, 0, 0);
-    } else {
-       box.getSize(size);
-       box.getCenter(center);
-    }
-
-    // Auto-frame camera mathematically
-    const maxDim = Math.max(size.x, size.y, size.z);
-    const fov = camera.fov * (Math.PI / 180);
-    // Increase padding from 1.5 to 2.2 to make the robot appear smaller within the window
-    let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2)) * 2.2; 
-
-    console.log("✅ Bounding Box Computed:", { size, center, maxDim, cameraZ });
-
-    // Shift model so its true center is (0,0,0) BEFORE putting it in a group
-    model.position.sub(center);
-
-    // Place camera relative to the newly centered origin
-    camera.position.set(0, (size.y * 0.2), cameraZ);
-    camera.lookAt(0, 0, 0);
-    
-    // Adjust lights to encompass the visible model at origin
-    keyLight.position.set(maxDim, maxDim, maxDim);
-    keyLight.castShadow = false;
-    rimLight.position.set(-maxDim, maxDim, -maxDim);
-
-    robotGroup = new THREE.Group();
-    robotGroup.add(model);
-    
-    // Rotate the robot a bit to the left (facing left side of screen)
-    robotGroup.rotation.y = -0.5; // ~ -30 degrees
-    
-    scene.add(robotGroup);
-
-    // Save references to specific robot parts for procedural idle animation
-    headNode = model.getObjectByName('Head_13') || model.getObjectByName('Head Rotate_14');
-    bodyNode = model.getObjectByName('Robot_Main_Controller_40') || model.getObjectByName('Body_25') || model;
-    armRNode = model.getObjectByName('Arm_1_Right_26') || model.getObjectByName('Arm 1 Right_26');
-    armLNode = model.getObjectByName('Arm_1_Left_35') || model.getObjectByName('Arm 1 Left_35');
-
-    // Store their resting poses so we don't snap them into the sky or fold them backward!
-    if (headNode) headInitRot = headNode.rotation.clone();
-    if (bodyNode) {
-      bodyInitPos = bodyNode.position.clone();
-      bodyInitRot = bodyNode.rotation.clone();
-    }
-    if (armRNode) armRInitRot = armRNode.rotation.clone();
-    if (armLNode) armLInitRot = armLNode.rotation.clone();
-
-    console.log('✅ Robot model loaded natively with procedural targets');
-  },
-  (progress) => {
-    if (progress.total > 0) {
-      console.log(`Loading… ${Math.round((progress.loaded / progress.total) * 100)}%`);
-    }
-  },
-  (err) => console.error('❌ Error loading model:', err)
+        console.log('✅ Robot model loaded natively with procedural targets');
+    },
+    (progress) => {
+        if (progress.total > 0) {
+            console.log(`Loading… ${Math.round((progress.loaded / progress.total) * 100)}%`);
+        }
+    },
+    (err) => console.error('❌ Error loading model:', err)
 );
 
 // ── Render size ────────────────────────────────────────────────────────────
 function updateSize() {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  renderer.setSize(w, h);
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
 }
 updateSize();
 window.addEventListener('resize', updateSize);
@@ -298,33 +298,33 @@ window.addEventListener('resize', updateSize);
 const clock = new THREE.Clock();
 
 function animate() {
-  requestAnimationFrame(animate);
-  const time = clock.getElapsedTime();
+    requestAnimationFrame(animate);
+    const time = clock.getElapsedTime();
 
-  // Procedural idle animations using sine waves!
-  if (headNode && headInitRot) {
-    // Gentle head turning, ADDED to initial rotation
-    headNode.rotation.y = headInitRot.y + Math.sin(time * 0.7) * 0.15;
-    headNode.rotation.z = headInitRot.z + Math.sin(time * 0.4) * 0.05;
-  }
-  
-  if (bodyNode && bodyInitPos) {
-    // Gentle body sway/breathing
-    bodyNode.rotation.y = bodyInitRot.y + Math.sin(time * 0.5) * 0.05;
-    bodyNode.position.y = bodyInitPos.y + Math.sin(time * 1.5) * 0.02;
-  }
-  
-  if (armRNode && armRInitRot) {
-    // Subtle arm floating
-    armRNode.rotation.z = armRInitRot.z + Math.sin(time * 0.8) * 0.1;
-  }
-  
-  if (armLNode && armLInitRot) {
-    // Subtle arm floating (offset from right arm)
-    armLNode.rotation.z = armLInitRot.z + Math.sin(time * 0.8 + 1) * 0.1;
-  }
+    // Procedural idle animations using sine waves!
+    if (headNode && headInitRot) {
+        // Gentle head turning, ADDED to initial rotation
+        headNode.rotation.y = headInitRot.y + Math.sin(time * 0.7) * 0.15;
+        headNode.rotation.z = headInitRot.z + Math.sin(time * 0.4) * 0.05;
+    }
 
-  renderer.render(scene, camera);
+    if (bodyNode && bodyInitPos) {
+        // Gentle body sway/breathing
+        bodyNode.rotation.y = bodyInitRot.y + Math.sin(time * 0.5) * 0.05;
+        bodyNode.position.y = bodyInitPos.y + Math.sin(time * 1.5) * 0.02;
+    }
+
+    if (armRNode && armRInitRot) {
+        // Subtle arm floating
+        armRNode.rotation.z = armRInitRot.z + Math.sin(time * 0.8) * 0.1;
+    }
+
+    if (armLNode && armLInitRot) {
+        // Subtle arm floating (offset from right arm)
+        armLNode.rotation.z = armLInitRot.z + Math.sin(time * 0.8 + 1) * 0.1;
+    }
+
+    renderer.render(scene, camera);
 }
 
 animate();
@@ -332,12 +332,9 @@ animate();
 // ── TTS & Offline Voice Recognition (VOSK) ─────────────────────────────────
 let currentAudio = null;
 let recognizer = null;
-const API_KEY = window.require('dotenv').config().parsed.GROK_API_KEY;
 
-// Base64 PCM16 continuous playback
-let grokAudioContext = new window.AudioContext({ sampleRate: 24000 });
-let nextPlayTime = 0;
-let activeGrokSources = []; // Registry to track and cancel overlapping Grok audio
+// ── Audio Playback (for Gemini TTS WAV files) ─────────────────────────────
+let geminiAudioContext = new window.AudioContext({ sampleRate: 24000 });
 
 function stopAllPlayback() {
     // Stop Piper/Local TTS
@@ -349,171 +346,43 @@ function stopAllPlayback() {
     if (window.speechSynthesis.speaking) {
         window.speechSynthesis.cancel();
     }
-    
-    // Stop Grok Realtime Audio
-    activeGrokSources.forEach(source => {
-        try { 
-            source.onended = null;
-            source.stop(); 
-        } catch(e) {}
-    });
-    activeGrokSources = [];
-    nextPlayTime = grokAudioContext.currentTime;
-    
     window.novaState.isSpeaking = false;
 }
 
-function playAudioChunk(base64Audio) {
-    if (grokAudioContext.state === 'suspended') grokAudioContext.resume();
-    window.novaState.isSpeaking = true;
-    listeningSymbol.innerHTML = '🔊 Nova is speaking...';
-    listeningSymbol.style.display = 'block';
-    
-    const binaryString = window.atob(base64Audio);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-    }
-    const int16 = new Int16Array(bytes.buffer);
-    const float32 = new Float32Array(int16.length);
-    for (let i = 0; i < int16.length; i++) {
-        float32[i] = int16[i] / 32768.0;
-    }
 
-    const audioBuffer = grokAudioContext.createBuffer(1, float32.length, 24000);
-    audioBuffer.getChannelData(0).set(float32);
-
-    const source = grokAudioContext.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(grokAudioContext.destination);
-
-    if (nextPlayTime < grokAudioContext.currentTime) {
-        nextPlayTime = grokAudioContext.currentTime;
-    }
-    source.onended = () => {
-        activeGrokSources = activeGrokSources.filter(s => s !== source);
-        if (activeGrokSources.length === 0) {
-            window.novaState.isSpeaking = false;
-        }
-    };
-    source.start(nextPlayTime);
-    activeGrokSources.push(source);
-    nextPlayTime += audioBuffer.duration;
-}
-
-// Websocket Realtime Connection
-let grokSocket = null;
-
-async function initGrokSocket() {
-    try {
-        const response = await fetch("https://api.x.ai/v1/realtime/client_secrets", {
-            method: 'POST',
-            headers: {
-                "Authorization": `Bearer ${API_KEY}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ "expires_after": { "seconds": 3600 } })
-        });
-        const data = await response.json();
-        const token = data.value;
-        
-        grokSocket = new WebSocket("wss://api.x.ai/v1/realtime", [`xai-client-secret.${token}`]);
-        
-        grokSocket.onopen = () => {
-            console.log("🟢 Grok Realtime Connected!");
-            grokSocket.send(JSON.stringify({
-                type: "session.update",
-                session: {
-                    voice: "Rex",
-                    instructions: "You are Nova, an advanced, highly intelligent sci-fi desktop worker robot. Embody this persona fully. Keep your answers extremely concise and direct. NEVER introduce yourself. Talk naturally.",
-                    turn_detection: null, // We handle turns via Vosk (client side VAD)
-                    audio: {
-                        output: { format: { type: "audio/pcm", rate: 24000 } }
-                    }
-                }
-            }));
-        };
-
-        grokSocket.onmessage = (event) => {
-            const msg = JSON.parse(event.data);
-            if (msg.type === "response.output_audio.delta") {
-                playAudioChunk(msg.delta);
-            } else if (msg.type === "response.output_audio_transcript.done") {
-                console.log("🤖 Grok:", msg.transcript);
-            } else if (msg.type === "response.done") {
-                console.log("✅ Grok Finished Response (WebSocket).");
-                // Note: We don't set isSpeaking = false here anymore; 
-                // the source.onended handlers for the buffered audio chunks will handle it.
-                
-                // Wait for audio to actually finish before resuming recording
-                const checkFinished = setInterval(() => {
-                    if (activeGrokSources.length === 0) {
-                        clearInterval(checkFinished);
-                        window.novaState.isSpeaking = false;
-                        listeningSymbol.style.display = 'none';
-                        if (window.novaState.isAwake) {
-                            setTimeout(() => {
-                                if (window.novaVoice.startRecording) window.novaVoice.startRecording();
-                            }, 1000);
-                        }
-                    }
-                }, 200);
-            }
-        };
-
-        grokSocket.onclose = () => {
-            console.log("🔴 Grok Realtime Disconnected. Reconnecting in 3s...");
-            setTimeout(initGrokSocket, 3000);
-        };
-    } catch(e) {
-        console.error("Grok Socket Init Error:", e);
-    }
-}
-
-// Start Grok WS connection
-initGrokSocket();
-
-function askGrokRealtime(text) {
+// ── Nova Conversational Response via Gemini ─────────────────────────────────
+async function askNova(text) {
     if (window.novaState.isProcessingCommand || window.novaState.isAwaitingPlatform || window.novaState.pendingChoices.length > 0) {
-        console.log("🤫 Silencing Grok because an action is in progress.");
+        console.log('🤫 Silencing Nova because an action is in progress.');
         return;
     }
-    if (!grokSocket || grokSocket.readyState !== WebSocket.OPEN) {
-        console.error("Grok Socket not ready!");
-        return;
-    }
-    // Stop any currently overlapping audio
     stopAllPlayback();
     window.novaState.isSpeaking = true;
     listeningSymbol.innerHTML = '🤖 Thinking...';
     listeningSymbol.style.display = 'block';
-    console.log(`📡 Sending to Grok: "${text}"`);
-    
-    // Create the message
-    grokSocket.send(JSON.stringify({
-        type: "conversation.item.create",
-        item: {
-            type: "message",
-            role: "user",
-            content: [{ type: "input_text", text: text }]
+    console.log(`📡 Sending to Gemini: "${text}"`);
+    try {
+        const reply = await ipcRenderer.invoke('ask-grok', text);
+        if (reply) {
+            console.log('🤖 Nova:', reply);
+            await speak(reply);
         }
-    }));
-    // Request Nova to respond with audio
-    grokSocket.send(JSON.stringify({
-        type: "response.create",
-        response: { modalities: ["audio", "text"] }
-    }));
+    } catch (e) {
+        console.error('Nova response error:', e);
+        window.novaState.isSpeaking = false;
+        listeningSymbol.style.display = 'none';
+    }
 }
+
 
 // Speak function for automation responses
 // Speak function for automation responses
 async function speak(text) {
     if (!text) return;
-    
+
     // Stop any current speech/audio across all engines
     stopAllPlayback();
-    
+
     // Safety: Reset speaking state
     window.novaState.isSpeaking = false;
     listeningSymbol.style.opacity = '1';
@@ -546,17 +415,17 @@ async function speak(text) {
     try {
         console.log('🔊 Generating Piper speech for:', text);
         const audioPath = await ipcRenderer.invoke('generate-speech', text);
-        
+
         if (audioPath) {
             console.log('🔊 Audio generated at:', audioPath);
             const audio = new Audio();
             currentAudio = audio; // Track this so we can cancel it
-            
+
             audio.addEventListener('error', (e) => {
                 console.error('🔊 Audio error, falling back to Web Speech:', e);
                 useWebSpeech(text);
             });
-            
+
             audio.addEventListener('loadeddata', () => {
                 if (hasStartedAnySpeech) {
                     audio.pause();
@@ -568,7 +437,7 @@ async function speak(text) {
                 listeningSymbol.innerHTML = '🔊 Speaking...';
                 listeningSymbol.style.color = '#fff';
                 listeningSymbol.style.opacity = '0.5';
-                
+
                 audio.play().then(() => {
                     uiLog(`🔊 Voice (Piper): "${text}"`);
                 }).catch(err => {
@@ -576,7 +445,7 @@ async function speak(text) {
                     useWebSpeech(text);
                 });
             });
-            
+
             audio.addEventListener('ended', () => {
                 if (currentAudio === audio) currentAudio = null;
                 window.novaState.isSpeaking = false;
@@ -594,7 +463,7 @@ async function speak(text) {
                     listeningSymbol.style.opacity = '1';
                 }
             }, 15000);
-            
+
             // Add small delay to avoid race condition with file system and retry if needed
             let retryCount = 0;
             const loadAudio = () => {
@@ -697,10 +566,10 @@ function showChoices(choices) {
         choicesOverlay.style.fontFamily = 'sans-serif';
         document.body.appendChild(choicesOverlay);
     }
-    
+
     choicesOverlay.innerHTML = '<div style="font-weight: bold; border-bottom: 1px solid #0ff; margin-bottom: 10px; text-align: center; font-size: 14px;">Select match:</div>';
     choicesOverlay.style.display = 'block';
-    
+
     choices.forEach((choice, index) => {
         const btn = document.createElement('div');
         btn.innerText = `${index + 1}. ${choice.title}`;
@@ -711,7 +580,7 @@ function showChoices(choices) {
         btn.style.borderRadius = '5px';
         btn.style.fontSize = '12px';
         btn.style.transition = 'all 0.2s';
-        
+
         btn.onmouseover = () => {
             btn.style.backgroundColor = 'rgba(0, 255, 255, 0.2)';
             btn.style.borderColor = '#0ff';
@@ -720,7 +589,7 @@ function showChoices(choices) {
             btn.style.backgroundColor = 'transparent';
             btn.style.borderColor = 'rgba(0, 255, 255, 0.2)';
         };
-        
+
         btn.onclick = () => {
             window.novaState.pendingTopic = choice.title;
             window.novaState.isAwaitingPlatform = true;
@@ -740,12 +609,12 @@ function showPlatformChoices() {
         </div>
         <div style="text-align: center; margin-bottom: 10px; font-size: 12px;">Search on:</div>
     `;
-    
+
     const platforms = [
         { name: '🌐 Google Search', value: 'google' },
         { name: '🎬 YouTube Video', value: 'youtube' }
     ];
-    
+
     platforms.forEach(p => {
         const btn = document.createElement('div');
         btn.innerText = p.name;
@@ -758,7 +627,7 @@ function showPlatformChoices() {
         btn.style.backgroundColor = 'rgba(0, 255, 255, 0.1)';
         btn.style.fontSize = '13px';
         btn.style.transition = 'all 0.2s';
-        
+
         btn.onmouseover = () => {
             btn.style.backgroundColor = 'rgba(0, 255, 255, 0.3)';
             btn.style.transform = 'scale(1.05)';
@@ -767,7 +636,7 @@ function showPlatformChoices() {
             btn.style.backgroundColor = 'rgba(0, 255, 255, 0.1)';
             btn.style.transform = 'scale(1)';
         };
-        
+
         btn.onclick = () => {
             const platform = p.value;
             const query = window.novaState.pendingTopic;
@@ -792,10 +661,10 @@ function hideChoices() {
 
 async function analyzeScreen(userText) {
     try {
-        uiLog("📸 Capturing screen for vision analysis...");
+        uiLog('📸 Capturing screen for vision analysis...');
         const screenshot = await ipcRenderer.invoke('capture-screen');
         if (!screenshot) {
-            uiLog("❌ Screen capture failed.");
+            uiLog('❌ Screen capture failed.');
             return null;
         }
 
@@ -807,239 +676,90 @@ async function analyzeScreen(userText) {
         
         CRITICAL:
         1. If "is_video_player" is true, the user is likely on a video page.
-        2. If you can see or infer the direct URL, provide it. 
-        3. If it is a YouTube video and you can't get the exact URL, provide the title.
+        2. If you can see or infer the direct URL, provide it.
+        3. If it is a YouTube video and you can\u2019t get the exact URL, provide the title.
         4. "Play it" implies the user wants to play what's currently on screen or selected.`;
 
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: 'gpt-4o',
-                messages: [
-                    {
-                        role: 'user',
-                        content: [
-                            { type: 'text', text: visionPrompt },
-                            { type: 'image_url', image_url: { url: screenshot } }
-                        ]
-                    }
-                ],
-                max_tokens: 300
-            })
+        // Use Gemini via the ask-grok IPC but send screenshot context separately
+        // Since the main gemini.js only accepts text, we send a text description request.
+        // For a full vision call we pass the screenshot through a direct Gemini SDK call.
+        const { GoogleGenAI } = window.require('@google/genai');
+        const dotenv = window.require('dotenv');
+        dotenv.config();
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+        // Extract base64 from data URL
+        const base64Image = screenshot.replace(/^data:image\/\w+;base64,/, '');
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: [{
+                parts: [
+                    { inlineData: { mimeType: 'image/png', data: base64Image } },
+                    { text: visionPrompt }
+                ]
+            }]
         });
 
-        const data = await response.json();
-        const content = data.choices[0].message.content.trim();
-        // Extract JSON if AI adds markdown
+        const content = response.text.trim();
         const jsonMatch = content.match(/\{[\s\S]*\}/);
         const result = JSON.parse(jsonMatch ? jsonMatch[0] : content);
-        
         console.log('👁️ Vision result:', result);
         return result;
     } catch (e) {
-        console.error("👁️ Vision error:", e);
+        console.error('👁️ Vision error:', e);
         return null;
     }
 }
+
 
 async function initOfflineVoice() {
     try {
         uiLog("1/3 Requesting Microphone...");
         const mediaStream = await navigator.mediaDevices.getUserMedia({
-            video: false, 
-            audio: { 
-                echoCancellation: true, 
-                noiseSuppression: true, 
+            video: false,
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
                 autoGainControl: true,
-                channelCount: 1, 
-                sampleRate: 16000 
+                channelCount: 1,
+                sampleRate: 16000
             }
         });
-        
+
         uiLog("2/3 Loading AI Voice Model (40MB)...");
         const modelUrl = 'appassets://model.tar.gz';
         const model = await window.Vosk.createModel(modelUrl);
         uiLog("3/3 AI Engine Ready!");
-        
+
         recognizer = new model.KaldiRecognizer(16000); // Restore full vocabulary for better wake-word coverage
         recognizer.setWords(true);
-        
+
         let accumulatedSpeech = "";
         let sleepTimer;
         let speechTimer = null;
         let lastUserCommand = ""; // Track last command for context awareness
-        let mediaRecorder = null;
-        let audioChunks = [];
         let silenceThreshold = 0.01; // Volume threshold for silence
         let silenceDuration = 2500; // MS of silence to trigger Whisper
         let lastAudioTime = Date.now();
 
-        const startRecording = async () => {
-            try {
-                if (window.novaState.isSpeaking) {
-                    console.log("🤫 Nova is speaking, delaying microphone start...");
-                    return;
-                }
-                if (mediaRecorder && mediaRecorder.state === 'recording') {
-                    console.log("⚠️ MediaRecorder already recording, skipping start.");
-                    return;
-                }
-                
-                audioChunks = [];
-                const stream = mediaStream;
-                // Use opus for better stability and quality
-                mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
-                
-                mediaRecorder.ondataavailable = (event) => {
-                    if (event.data.size > 0) audioChunks.push(event.data);
-                };
-                
-                mediaRecorder.onstop = async () => {
-                    console.log("🏁 MediaRecorder stopped. Chunk count:", audioChunks.length);
-                    if (audioChunks.length === 0) {
-                        console.log("⚠️ No audio data available.");
-                        if (window.novaState.isAwake && !window.novaState.isSpeaking) startRecording();
-                        return;
-                    }
-
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/webm;codecs=opus' });
-                    const arrayBuffer = await audioBlob.arrayBuffer();
-                    const buffer = Buffer.from(arrayBuffer);
-                    
-                    if (buffer.length < 100) {
-                        console.log("⚠️ Audio buffer too small, ignoring transcription.");
-                    } else {
-                        uiLog("🎙️ Transcribing with Whisper...");
-                        const transcription = await ipcRenderer.invoke('transcribe-audio', buffer);
-                        
-                        // GARBAGE FILTERING: Ignore noise, common hallucinations, or extremely short transients
-                        const rawT = (transcription || "").trim();
-                        const cleanT = rawT.toLowerCase().replace(/[.,?!]/g, '').replace(/-/g, ' ').trim();
-                        
-                        // Hallucination shield: suppress known Whisper artifacts and common background chatter
-                        const hallucinationWords = ["you", "thank you", "bye", "bye bye", "goodbye", "i", "the", "a",
-                            "thanks", "okay", "ok", "um", "uh", "hmm", "oh", "ah", "yes", "no", "watching", "video",
-                            "please", "sorry", "excuse me", "right", "so", "well", "hey", "have fun", "enjoy",
-                            "thank you for watching", "thanks for watching", "subscribe", "notification bell", "next video"];
-                        
-                        // Detect repeated-phrase hallucinations or background noise patterns
-                        const sentences = rawT.split(/[.!?]+/).map(s => s.trim().toLowerCase()).filter(Boolean);
-                        const isRepeatedHallucination = sentences.length >= 2 && 
-                            sentences.every(s => hallucinationWords.some(h => s.includes(h) || s.length < 4));
-                        
-                        // Background noise regex: phrases that sound like conversation but have no command intent
-                        const backgroundNoiseRegex = /^(can you|if it doesn't|if you guys|just run|show up|don't know|i think|maybe|actually)/i;
-                        const isBackgroundTalk = backgroundNoiseRegex.test(cleanT) && cleanT.split(' ').length > 3 && !cleanT.match(/\b(play|search|youtube|google|focus|switch|open)\b/i);
-
-                        const commandWhitelist = /\b(hey|nova|search|find|look up|show me|play|weather|silence|stop|shut up|pause|unpause|switch|focus|open|close|click|press|select|scroll|select|pick)\b/i;
-                        const isCommand = commandWhitelist.test(cleanT);
-
-                        // VOSK OVERRIDE: If local ears saw a tactical command, bypass hallucination shield
-                        const voskSawTactical = window.novaState.lastVoskText && (window.novaState.lastVoskText.toLowerCase().match(/\b(click|select|scroll|pause|stop|resume|volume|higher|lower|search|find|open|close|hey|nova)\b/i));
-
-                        const isHallucination = !isCommand && !voskSawTactical && (
-                            cleanT.length < 2 
-                            || hallucinationWords.includes(cleanT)
-                            || isRepeatedHallucination
-                            || isBackgroundTalk
-                        );
-
-                        
-                        if (cleanT && !isHallucination) {
-                            // ── PHONETIC CORRECTIONS ──────────────────────────────────────────
-                            // Fix common Whisper mishearings before NLU sees them
-                            const PHONETIC_FIXES = {
-                                // Song/artist names
-                                '\\bjello\\b': 'yellow',
-                                '\\bjell-o\\b': 'yellow',
-                                '\\byellow\\b': 'yellow', // keep correct too
-                                '\\bcold play\\b': 'coldplay',
-                                '\\bcold-play\\b': 'coldplay',
-                                '\\bspot if i\\b': 'spotify',
-                                '\\bspot-if-i\\b': 'spotify',
-                                '\\byou tube\\b': 'youtube',
-                                '\\byou-tube\\b': 'youtube',
-                                // Click mishearings
-                                '\\balick\\b': 'click',
-                                '\\bclique\\b': 'click',
-                                '\\bcleek\\b': 'click',
-                                '\\bpick\\b': 'click',
-                                // Commands
-                                '\\bswitch two\\b': 'switch to',
-                                '\\bno va\\b': 'nova',
-                                '\\bhey know\\b': 'hey nova',
-                                '\\bhey nova\\b': 'hey nova',
-                                '\\bopen up\\b': 'open',
-                                '\\bvs code\\b': 'vscode',
-                                '\\bv s code\\b': 'vscode',
-                                '\\bnoiva\\b': 'nova',
-                                '\\bhey noiva\\b': 'hey nova',
-                                '\\bno eva\\b': 'nova',
-                            };
-                            let correctedT = rawT;
-                            for (const [pattern, replacement] of Object.entries(PHONETIC_FIXES)) {
-                                correctedT = correctedT.replace(new RegExp(pattern, 'gi'), replacement);
-                            }
-                            if (correctedT !== rawT) {
-                                console.log(`🔤 Phonetic correction: "${rawT}" → "${correctedT}"`);
-                                uiLog(`🔤 Corrected: "${correctedT}"`);
-                            }
-                            await processCommand(correctedT);
-
-                        } else {
-                            console.log(`🔇 Ignoring noise/hallucination: "${rawT}"`);
-                            if (cleanT.length > 0) {
-                                uiLog(`🔇 Noise Ignored: "${cleanT}"`);
-                                listeningSymbol.innerHTML = '🎤 Noise ignored...';
-                                setTimeout(() => {
-                                    if (!window.novaState.isSpeaking) {
-                                        listeningSymbol.innerHTML = window.novaState.isInConversation ? '🎤 Continuing...' : '🎤 Listening...';
-                                    }
-                                }, 1500);
-                            }
-                        }
-                    }
-
-                    // CONTINUOUS LISTENING: If still awake, start a new recording session
-                    if (window.novaState.isAwake) {
-                        console.log("🔄 Restarting recording for next command segment...");
-                        startRecording();
-                    }
-                };
-                
-                mediaRecorder.start();
-                lastAudioTime = Date.now(); // Reset silence timer when recording actually starts
-                console.log("🎙️ Whisper Recording Session Started.");
-            } catch (err) {
-                console.error("❌ Failed to start MediaRecorder:", err);
-                uiLog("Voice Error: Failed to start recorder");
-            }
-        };
-
-        const stopRecording = () => {
-            if (mediaRecorder && mediaRecorder.state === 'recording') {
-                mediaRecorder.stop();
-                console.log("🎙️ Recording stopped.");
-            }
-        };
+        const startRecording = async () => { }; // STUB
+        const stopRecording = () => { }; // STUB
 
         const wakeUp = () => {
             stopAllPlayback();
             window.novaState.isAwake = true;
             window.novaState.isInConversation = true;
-            
-            // User requested: Stop songs/media when a COMMAND is recognized (moved to handlers)
-            // ipcRenderer.invoke('stop-media');
-            
+
+            // Notify backend wrapper to open ai.live.connect WebSockets!
+            ipcRenderer.send('live-start');
+
             clearTimeout(sleepTimer);
             sleepTimer = setTimeout(() => {
                 window.novaState.isAwake = false;
                 window.novaState.isInConversation = false;
                 uiLog("💤 Entered Sleep Mode");
+                ipcRenderer.send('live-end');
             }, 30000); // Longer timeout for conversations
         };
 
@@ -1048,7 +768,7 @@ async function initOfflineVoice() {
             window.novaState.isInConversation = false;
             accumulatedSpeech = "";
             clearTimeout(sleepTimer);
-            stopRecording(); // Stop any active command recording immediately
+            ipcRenderer.send('live-end');
             uiLog("👋 Conversation ended. Say 'Hey Nova' to start again.");
         };
 
@@ -1062,10 +782,10 @@ async function initOfflineVoice() {
         recognizer.on("partialresult", (message) => {
             if (window.novaState.isSpeaking) return; // Prevent loop where Nova hears itself
             const text = message.result.partial.toLowerCase();
-            if(!text) return;
+            if (!text) return;
 
             // Start recording as soon as we hear a potential wake word or direct control
-            if(!window.novaState.isAwake && text.match(/\b(hey|hay|hi|play|look|see|volume|lower|higher|quieter|louder|stop|pause)\b/i)) {
+            if (!window.novaState.isAwake && text.match(/\b(hey|hay|hi|play|look|see|volume|lower|higher|quieter|louder|stop|pause)\b/i)) {
                 window.novaVoice.wakeUp();
                 window.novaVoice.startRecording();
             }
@@ -1077,11 +797,11 @@ async function initOfflineVoice() {
                 uiLog("🔔 Instant Wake detected in Partial (Unsilencing)");
             }
 
-            if(window.novaState.isAwake) {
+            if (window.novaState.isAwake) {
                 listeningSymbol.innerHTML = window.novaState.isInConversation ? '🎤 Continuing conversation...' : '🎤 Listening...';
                 listeningSymbol.style.color = '#0ff';
                 listeningSymbol.style.display = 'block';
-                
+
                 // Hide [unk] from the subtitle to avoid confusion
                 const cleanText = text.replace(/\[unk\]/g, '').trim();
                 if (cleanText) {
@@ -1098,15 +818,15 @@ async function initOfflineVoice() {
                 clearTimeout(speechTimer);
             }
         });
-        
+
         // Triggered when user finishes sentence and falls silent
         recognizer.on("result", (message) => {
             if (window.novaState.isSpeaking && !message.result.text.match(/\b(stop|quiet|hush|cancel)\b/i)) return; // Allow early exit interruptions but block self-talk
             let text = message.result.text.toLowerCase().trim();
-            
+
             // Filter [unk] from final result
             text = text.replace(/\[unk\]/g, '').trim();
-            if(!text) return;
+            if (!text) return;
 
             // WAKE WORD DETECTION (Instant Wake)
             const wakeRegex = /\b(hey|hay|hi|ey|hello)\b.*?\b(nova|noiva|noah|noa|know|no|know a)\b/i;
@@ -1132,11 +852,11 @@ async function initOfflineVoice() {
                 console.log("⚡ Instant Silence detected in Vosk:", text);
                 window.novaState.isSilenced = true;
                 uiLog("🔇 Silence mode activated (Instant).");
-                subtitleElement.innerText = ""; 
+                subtitleElement.innerText = "";
                 speak("Okay, I'll be quiet now.");
                 return;
             }
-            
+
             const interruptKeywords = ['stop', 'play it', 'see', 'look', 'wait', 'quiet', 'hey', 'nova', 'click', 'select', 'pick'];
             const isInterrupt = interruptKeywords.some(kw => text.includes(kw));
 
@@ -1158,7 +878,7 @@ async function initOfflineVoice() {
 
             // WAKE UP: If asleep, wake up on greeting or direct command
             const isSelection = window.novaState.pendingChoices.length > 0 && text.match(/\b(one|first|two|second|three|third|four|fourth|1|2|3|4)\b/i);
-            
+
             if (!window.novaState.isAwake && (text.match(/\b(hey|hay|hi|volume|lower|higher|stop|pause|scroll|noiva)\b/i) || isSelection)) {
                 window.novaVoice.wakeUp();
                 // DIRECT TACTICAL COMMANDS ONLY (Volume, Pause, Scroll)
@@ -1174,12 +894,12 @@ async function initOfflineVoice() {
             }
 
             if (window.novaState.isAwake && text.match(/\b(pause|stop|resume|volume|lower|higher|quieter|louder|increase|decrease|scroll|close)\b/i)) {
-                 console.log("⚡ Tactical Direct Command detected in Vosk (Active):", text);
-                 window.novaState.lastDirectCommandTime = Date.now();
-                 window.novaState.lastDirectCommandText = text;
-                 stopRecording(); 
-                 processCommand(text);
-                 return;
+                console.log("⚡ Tactical Direct Command detected in Vosk (Active):", text);
+                window.novaState.lastDirectCommandTime = Date.now();
+                window.novaState.lastDirectCommandText = text;
+                stopRecording();
+                processCommand(text);
+                return;
             }
 
             if (window.novaState.isAwake && window.novaState.pendingChoices.length > 0) {
@@ -1187,7 +907,7 @@ async function initOfflineVoice() {
                 if (selectionPattern.test(text)) {
                     console.log("⚡ Immediate Selection detected in Vosk:", text);
                     uiLog(`⚡ Selection: "${text}"`);
-                    stopRecording(); 
+                    stopRecording();
                     processCommand(text);
                     return;
                 }
@@ -1200,7 +920,7 @@ async function initOfflineVoice() {
                 if (platformPattern.test(text)) {
                     console.log("⚡ Immediate Platform selection detected in Vosk:", text);
                     uiLog(`⚡ Platform: "${text}"`);
-                    stopRecording(); 
+                    stopRecording();
                     processCommand(text);
                     return;
                 }
@@ -1212,11 +932,11 @@ async function initOfflineVoice() {
                 console.log("👂 Vosk segment ended, but keeping Whisper recording active...");
             }
         });
-        
+
         const audioContext = new window.AudioContext({ sampleRate: 16000 });
         const gainNode = audioContext.createGain();
         gainNode.gain.value = 2.5; // Significant boost for distant voice / low-signal mics
-        
+
         const micSource = audioContext.createMediaStreamSource(mediaStream);
         micSource.connect(gainNode);
 
@@ -1240,28 +960,145 @@ async function initOfflineVoice() {
         const recognizerNode = audioContext.createScriptProcessor(4096, 1, 1);
         gainNode.connect(recognizerNode);
         let meterThrottle = 0;
+
+        // --- WebSockets Audio Playback Engine ---
+        let audioQueue = [];
+        let isPlayingLive = false;
+        const livePlaybackContext = new window.AudioContext({ sampleRate: 24000 });
+
+        async function playLiveQueue() {
+            if (isPlayingLive || audioQueue.length === 0) return;
+            isPlayingLive = true;
+            window.novaState.isSpeaking = true;
+            listeningSymbol.innerHTML = '🔊 Speaking...';
+            listeningSymbol.style.display = 'block';
+
+            const audioBuffer = audioQueue.shift();
+            const source = livePlaybackContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(livePlaybackContext.destination);
+            source.onended = () => {
+                if (audioQueue.length > 0) {
+                    isPlayingLive = false;
+                    playLiveQueue();
+                } else {
+                    isPlayingLive = false;
+                    window.novaState.isSpeaking = false;
+                    listeningSymbol.style.display = 'none';
+                }
+            };
+            source.start();
+        }
+
+        ipcRenderer.on('live-audio-chunk', (event, base64Data) => {
+            const binaryString = atob(base64Data);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            const int16Array = new Int16Array(bytes.buffer);
+
+            const float32Array = new Float32Array(int16Array.length);
+            for (let i = 0; i < int16Array.length; i++) {
+                float32Array[i] = int16Array[i] / 32768.0;
+            }
+
+            const audioBuffer = livePlaybackContext.createBuffer(1, float32Array.length, 24000);
+            audioBuffer.copyToChannel(float32Array, 0);
+
+            audioQueue.push(audioBuffer);
+            playLiveQueue();
+        });
+
+        ipcRenderer.on('live-session-event', (event, status) => {
+            if (status.event === 'opened') {
+                window.novaState.isLiveActive = true;
+                uiLog("🔴 [LIVE] Bi-directional mode active");
+            }
+            if (status.event === 'closed') {
+                window.novaState.isLiveActive = false;
+                uiLog("⚪ [LIVE] Bi-directional mode ended");
+            }
+            if (status.event === 'interrupted') {
+                audioQueue = []; // Clear queue on interrupt
+            }
+            if (status.event === 'closed' && status.code === 1007) {
+                console.log("❌ API Key Error: Google dropped the connection");
+                const utterance = new window.SpeechSynthesisUtterance("Your API key is invalid or missing. Please insert a real API key into the dot env file.");
+                window.speechSynthesis.speak(utterance);
+                subtitleElement.innerText = "Error: Invalid API Key. Please edit .env file.";
+                subtitleElement.style.color = '#ff4444';
+
+                // Force sleep
+                window.novaState.isAwake = false;
+                window.novaState.isInConversation = false;
+                clearTimeout(sleepTimer);
+            }
+        });
+
+        ipcRenderer.on('live-command-trigger', (event, action) => {
+            console.log('⚡ [Live Tool Trigger] Executing OS Command:', action);
+            ipcRenderer.invoke('execute-automation', action.trim());
+        });
+
+        // Agentic Browser Relays: Nova -> Engine -> Browser
+        ipcRenderer.on('browser-open', (event, data) => {
+            console.log('🌍 Relay: Opening Browser for', data);
+            ipcRenderer.invoke('browser-open', data);
+        });
+        ipcRenderer.on('browser-scroll', (event, direction) => {
+            console.log('🌍 Relay: Scrolling Browser', direction);
+            ipcRenderer.send('browser-scroll', direction);
+        });
+        ipcRenderer.on('browser-click', (event, target) => {
+            console.log('🌍 Relay: Clicking Browser Element:', target);
+            ipcRenderer.send('browser-click', target);
+        });
+        ipcRenderer.on('browser-close', () => {
+            console.log('🌍 Relay: Closing Browser');
+            ipcRenderer.send('browser-close');
+        });
+
+        let streamingTextBuffer = "";
+        ipcRenderer.on('live-text-chunk', (event, text) => {
+            streamingTextBuffer += text;
+
+            subtitleElement.style.color = '#fb0';
+            subtitleElement.innerText = streamingTextBuffer;
+        });
+
         recognizerNode.onaudioprocess = (event) => {
-            try { 
-                if (recognizer) recognizer.acceptWaveform(event.inputBuffer); 
-                
+            try {
+                if (recognizer) recognizer.acceptWaveform(event.inputBuffer);
+
                 const data = event.inputBuffer.getChannelData(0);
                 let maxVol = 0;
                 for (let i = 0; i < data.length; i++) {
                     if (Math.abs(data[i]) > maxVol) maxVol = Math.abs(data[i]);
                 }
 
-                // Volume-based silence detection for Whisper trigger
-                if (window.novaState.isAwake && mediaRecorder && mediaRecorder.state === 'recording') {
+                // If Awake, stream WebSockets chunks natively
+                if (window.novaState.isAwake) {
                     if (maxVol > silenceThreshold) {
                         lastAudioTime = Date.now();
                     } else {
                         if (Date.now() - lastAudioTime > silenceDuration) {
-                            console.log("🤫 Silence detected via volume filter. Triggering Whisper...");
-                            stopRecording();
-                            subtitleElement.style.color = '#fb0';
-                            listeningSymbol.innerHTML = '⚙️ Processing...';
-                            listeningSymbol.style.color = '#fb0';
+                            if (!window.novaState.isSpeaking) {
+                                // Just a visual sleep hint, actual timeout relies on sleepTimer
+                                console.log("🤫 Silence detected. Waiting...");
+                            }
                         }
+                    }
+
+                    // Route out Float32 PCM arrays into 16kHz Int16 for Gemini
+                    if (!window.novaState.isSpeaking) {
+                        const pcm = new Int16Array(data.length);
+                        for (let i = 0; i < data.length; i++) {
+                            let s = Math.max(-1, Math.min(1, data[i]));
+                            pcm[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+                        }
+                        const buffer = Buffer.from(pcm.buffer);
+                        ipcRenderer.send('live-audio-chunk', buffer.toString('base64'));
                     }
                 }
 
@@ -1272,15 +1109,15 @@ async function initOfflineVoice() {
             } catch (error) { console.error('acceptWaveform error:', error); }
         };
         gainNode.connect(recognizerNode);
-        
+
         // Prevent Chromium from garbage collecting the graph by connecting it to the destination speaker.
 
         const silentNode = audioContext.createGain();
         silentNode.gain.value = 0;
         recognizerNode.connect(silentNode);
         silentNode.connect(audioContext.destination);
-        
-    } catch(e) {
+
+    } catch (e) {
         uiLog("Voice Error: " + (e.message || e));
     }
 }
@@ -1368,9 +1205,16 @@ async function processCommand(cmd) {
         return;
     }
 
+    // DEDUPLICATION GUARD: If Gemini Live is active, we ignore legacy command parsing
+    // to prevent "Double VS Code" or "Double Search" issues.
+    if (window.novaState.isLiveActive) {
+        console.log('🛡️ Deduplication: Ignoring legacy processCommand while Live Session is active.');
+        return;
+    }
+
     console.log('🎯 Processing Whisper command:', cmd);
     uiLog(`🎯 Whisper: "${cmd}"`);
-    
+
     let normalized = cmd.toLowerCase().trim();
     const now = Date.now();
 
@@ -1385,7 +1229,7 @@ async function processCommand(cmd) {
         // TACTICAL DOMINANCE: If local ears saw a verb and Whisper didn't, heal it!
         const noiseKeywords = ["thank you", "watching", "video", "have fun", "enjoy", "subscribe", "you you", "thanks"];
         const whisperIsNoise = noiseKeywords.some(n => whisper.includes(n)) || whisper.length < 3;
-        
+
         if (vVerb && !wVerb) {
             if (whisperIsNoise) {
                 console.log(`🩹 Tactical Override: Whisper is noise ("${whisper}"). Using Vosk: "${vosk}"`);
@@ -1408,15 +1252,15 @@ async function processCommand(cmd) {
         ipcRenderer.send('browser-scroll', direction);
         window.novaState.lastDirectCommandTime = now;
         window.novaState.isProcessingCommand = false;
-        return; 
+        return;
     }
-    
+
     if (normalized.match(/\b(pause|stop|resume|play the video)\b/i) && !normalized.includes('play ')) {
-         uiLog("⏯️ Media control...");
-         ipcRenderer.invoke('execute-automation', 'press-k');
-         window.novaState.lastDirectCommandTime = now;
-         window.novaState.isProcessingCommand = false;
-         return;
+        uiLog("⏯️ Media control...");
+        ipcRenderer.invoke('execute-automation', 'press-k');
+        window.novaState.lastDirectCommandTime = now;
+        window.novaState.isProcessingCommand = false;
+        return;
     }
 
     // 📁 DIRECT FOLDER OPENING (Bypass AI)
@@ -1479,7 +1323,7 @@ async function processCommand(cmd) {
     }
 
     // 3. Silence Mode (Quiet Mode)
-        if (normalized.match(/\b(silence|stop listening|shut up|be quiet|go to sleep|sleep mode|deactivate|quiet mode|go quiet|ignore me|don't listen)\b/i)) {
+    if (normalized.match(/\b(silence|stop listening|shut up|be quiet|go to sleep|sleep mode|deactivate|quiet mode|go quiet|ignore me|don't listen)\b/i)) {
         if (!window.novaState.isSilenced) {
             window.novaState.lastDirectCommandTime = now;
             window.novaState.isSilenced = true;
@@ -1510,7 +1354,7 @@ async function processCommand(cmd) {
             return;
         }
     }
-    
+
 
 
     // ── LOCAL SELECTION INTERCEPT (ZERO LATENCY) ────────────────────────────
@@ -1523,7 +1367,7 @@ async function processCommand(cmd) {
             else if (word.match(/\b(two|second|2)\b/)) index = 1;
             else if (word.match(/\b(three|third|3)\b/)) index = 2;
             else if (word.match(/\b(four|fourth|4)\b/)) index = 3;
-            
+
             if (index >= 0 && index < window.novaState.pendingChoices.length) {
                 const choice = window.novaState.pendingChoices[index];
                 uiLog(`✅ Local Selection: ${choice.title}`);
@@ -1538,7 +1382,7 @@ async function processCommand(cmd) {
 
     // Clean wake words if they were caught in the recording (with optional punctuation)
     cmd = cmd.replace(/^(hey|hay|hi|ey|hello)\b[.,:]*\s+(nova|noah|noa|know|no|know a)\b[.,:]*/i, '').trim();
-    
+
     // Check for context reset
     if (cmd.match(/\b(hey|hay|hi)\s+nova\b/)) {
         window.novaState.currentPlatform = null;
@@ -1566,7 +1410,7 @@ async function processCommand(cmd) {
         if (window.novaState.isSpeaking) window.speechSynthesis.cancel();
         if (target.length > 0) {
             uiLog(`🖱️ Scanning for: "${target}"...`);
-            
+
             // 1. Register listener BEFORE sending request (Fix Race Condition)
             const mapHandler = async (event, elements) => {
                 clearTimeout(mapTimeout);
@@ -1576,26 +1420,26 @@ async function processCommand(cmd) {
                     ipcRenderer.send('browser-click', target); // Fallback
                     return;
                 }
-                
+
                 // FAST MATCH: Exact text or title match
-                const exactMatch = elements.find(el => 
+                const exactMatch = elements.find(el =>
                     (el.text && el.text.toLowerCase().trim() === target.toLowerCase().trim()) ||
                     (el.title && el.title.toLowerCase().trim() === target.toLowerCase().trim()) ||
                     (el.ariaLabel && el.ariaLabel.toLowerCase().trim() === target.toLowerCase().trim())
                 );
-                
+
                 if (exactMatch) {
                     uiLog(`🖱️ Exact Match: "${target}" -> ID ${exactMatch.id}`);
                     ipcRenderer.send('browser-click-id', exactMatch.id);
                     return;
                 }
-                
+
                 const prompt = `Which element ID (number) best matches the user's intent to click on "${target}"?\nInteractive Elements:\n${JSON.stringify(elements)}\nReturn ONLY the ID number. If no match, return -1.`;
                 console.log("🧠 Sending resolution prompt to Grok...");
                 const result = await ipcRenderer.invoke('ask-grok', prompt);
                 console.log("🧠 Grok resolution result:", result);
                 const elementId = parseInt(result.replace(/[^0-9-9]/g, ''));
-                
+
                 if (elementId !== -1 && !isNaN(elementId)) {
                     ipcRenderer.send('browser-click-id', elementId);
                     uiLog(`🖱️ AI Clicked element ID ${elementId}`);
@@ -1604,18 +1448,18 @@ async function processCommand(cmd) {
                     ipcRenderer.send('browser-click', target); // Fallback
                 }
             };
-            
+
             ipcRenderer.once('browser-dom-map', mapHandler);
 
             // 2. Clear previous handlers and send request
             ipcRenderer.send('browser-get-map');
-            
+
             // Timeout for map request
             let mapTimeout = setTimeout(() => {
                 ipcRenderer.removeListener('browser-dom-map', mapHandler);
                 console.error("🕒 AI Click Error: DOM Map request timed out (5s).");
                 uiLog("🕒 Nova is taking too long to see the page. Trying fallback...");
-                ipcRenderer.send('browser-click', target); 
+                ipcRenderer.send('browser-click', target);
             }, 5000);
 
             window.novaState.isProcessingCommand = false;
@@ -1631,9 +1475,9 @@ async function processCommand(cmd) {
         if (query.length > 2) {
             console.log("⚡ Search Intercept Triggered:", query);
             uiLog(`⚡ Search: "${query}"`);
-            ipcRenderer.invoke('stop-media'); 
+            ipcRenderer.invoke('stop-media');
             const hasMusic = isMusicIntent(query);
-            await getSearchSuggestions(query, hasMusic); 
+            await getSearchSuggestions(query, hasMusic);
             return;
         }
     }
@@ -1729,79 +1573,76 @@ async function processCommand(cmd) {
     - NOTE: Do NOT return "stop" for polite greetings or goodbyes (e.g. "bye", "see you", "all right"). For those, just respond with the original text or "chat [text]".
     - Otherwise, respond with the action: ${cleanedCmd}
     Respond with ONLY the final command string. Do not use square brackets unless it's literally part of the command text.`;
-    
+
     window.novaState.isProcessingCommand = true;
     uiLog('🤖 Thinking...');
     try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                model: 'gpt-4o-mini',
-                messages: [
-                    { role: 'system', content: `You are a command interpreter. AVAILABLE ACTIONS: - "see [original text]" (visual intent) - "select [number]" (ONLY if options > 0) - "search [video/link] [query]" - "play [song name]" - "focus [app name]" (switch to/open a specific app) - "switch window" (cycle to next window, NO specific app). Respond with ONLY the command.` },
-                    { role: 'user', content: interpretationPrompt }
-                ],
-                max_tokens: 50,
-                temperature: 0.1
-            })
+        const { GoogleGenAI } = window.require('@google/genai');
+        const dotenv = window.require('dotenv');
+        dotenv.config();
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: interpretationPrompt,
+            config: {
+                systemInstruction: `You are a command interpreter. AVAILABLE ACTIONS: - "see [original text]" (visual intent) - "select [number]" (ONLY if options > 0) - "search [video/link] [query]" - "play [song name]" - "focus [app name]" (switch to/open a specific app) - "switch window" (cycle to next window, NO specific app). Respond with ONLY the command.`,
+                temperature: 0.1,
+                maxOutputTokens: 50
+            }
         });
-        const data = await response.json();
-        let interpretedCommand = data.choices[0].message.content.trim().toLowerCase();
-        
+        let interpretedCommand = response.text.trim().toLowerCase();
+
         // Handle explicit "CHAT" intent
         if (interpretedCommand.startsWith('chat ')) {
             window.novaState.isProcessingCommand = false;
-            await askGrokRealtime(interpretedCommand.replace('chat ', ''));
+            await askNova(interpretedCommand.replace('chat ', ''));
             return;
         }
 
         console.log('🤖 Interpreted command:', interpretedCommand);
         uiLog(`🤖 Interpreted: "${interpretedCommand}"`);
-         // Command type detection
-         const automationKeywords = ['open', 'search', 'youtube', 'browser', 'folder', 'vscode', 'cursor', 'antigravity', 'terminal', 'files', 'chrome', 'firefox', 'google', 'twitter', 'instagram', 'facebook', 'github', 'linkedin', 'click', 'video', 'link', 'directory', 'dir', 'play', 'song', 'switch', 'alt tab', 'focus', 'volume'];
-         const selectionKeywords = ['select', 'first', 'second', 'third', 'one', 'two', 'three', 'choice', 'option', '1', '2', '3'];
-        
+        // Command type detection
+        const automationKeywords = ['open', 'search', 'youtube', 'browser', 'folder', 'vscode', 'cursor', 'antigravity', 'terminal', 'files', 'chrome', 'firefox', 'google', 'twitter', 'instagram', 'facebook', 'github', 'linkedin', 'click', 'video', 'link', 'directory', 'dir', 'play', 'song', 'switch', 'alt tab', 'focus', 'volume'];
+        const selectionKeywords = ['select', 'first', 'second', 'third', 'one', 'two', 'three', 'choice', 'option', '1', '2', '3'];
+
         let isAutomationCommand = automationKeywords.some(keyword => interpretedCommand.includes(keyword));
-        
+
         // Selection handling
         if (window.novaState.pendingChoices.length > 0 && selectionKeywords.some(kw => interpretedCommand.includes(kw))) {
             isAutomationCommand = true;
         }
-        
+
         // Platform handling
         if (window.novaState.isAwaitingPlatform) {
             if (interpretedCommand.includes('google') || interpretedCommand.includes('youtube') || interpretedCommand.includes('search')) {
                 isAutomationCommand = true;
             }
         }
-        
+
         // Check if it's a question or conversation
         const questionWords = ['what', 'how', 'why', 'when', 'where', 'who', 'can you', 'could you', 'would you', 'should i', 'recommend', 'suggest', 'tell me', 'explain', 'do you', 'are there', 'what\'s'];
         const isQuestion = questionWords.some(word => interpretedCommand.includes(word));
-        
+
         // PRIORITIZE QUESTIONS: Even if it's tagged as automation (like "search"),
         // if it looks like a question and doesn't explicitly have the "search" verb in interpretedCommand
         const explicitSearch = interpretedCommand.startsWith('search');
-        
+
         if (isQuestion && (!isAutomationCommand || !explicitSearch)) {
             window.novaState.isProcessingCommand = false;
-            await askGrokRealtime(cmd);
+            await askNova(cmd);
             return;
         }
-        
+
         const normalizedCmd = interpretedCommand
             .replace(/you tube|youtube|you toob|utube/gi, 'youtube')
             .replace(/google search|google/gi, 'google');
-        
+
         if (isAutomationCommand) {
             // Selection Logic
             if (window.novaState.pendingChoices.length > 0 && selectionKeywords.some(kw => normalizedCmd.includes(kw))) {
                 let index = -1;
-                
+
                 // Try digit extraction first (select 1, option 2)
                 const digitMatch = normalizedCmd.match(/\d+/);
                 if (digitMatch) {
@@ -1812,7 +1653,7 @@ async function processCommand(cmd) {
                     else if (normalizedCmd.includes('second') || normalizedCmd.includes('two')) index = 1;
                     else if (normalizedCmd.includes('third') || normalizedCmd.includes('three')) index = 2;
                 }
-                
+
                 if (index >= 0 && index < window.novaState.pendingChoices.length) {
                     processSelection(window.novaState.pendingChoices[index]);
                     return;
@@ -1834,7 +1675,7 @@ async function processCommand(cmd) {
                     console.log("📺 Auto-playing YouTube video...");
                     setTimeout(async () => {
                         await ipcRenderer.invoke('execute-automation', 'press-k');
-                    }, 5000); 
+                    }, 5000);
                 }
                 return;
             }
@@ -1857,7 +1698,7 @@ async function processCommand(cmd) {
                     window.novaState.isProcessingCommand = false;
                     return;
                 }
-                
+
                 // If the only word left is "the" or similar, it's a resume/vision failure fallback
                 if (!searchTerm || searchTerm.length < 2) {
                     await ipcRenderer.invoke('play-media');
@@ -1865,15 +1706,15 @@ async function processCommand(cmd) {
                     window.novaState.isProcessingCommand = false;
                     return;
                 }
-                
+
                 const isVideo = hasMusicVideo || (normalizedCmd.includes('play') && isMusicIntent(searchTerm)) || normalizedCmd.includes('video') || normalizedCmd.includes('music');
-                
+
                 // UNIFIED BROWSER ROUTING: Always use the internal agent
                 const platform = isVideo ? 'youtube' : 'google';
                 uiLog(`🌐 Browser Agent: ${platform} for "${searchTerm}"...`);
                 speak(`Opening ${platform} for ${searchTerm}.`);
                 ipcRenderer.invoke('browser-open', { platform, query: searchTerm });
-                
+
                 window.novaState.isProcessingCommand = false;
                 return;
             }
@@ -1902,17 +1743,17 @@ async function processCommand(cmd) {
             await speak(resp);
         } else {
             window.novaState.isProcessingCommand = false;
-            await askGrokRealtime(cmd);
+            await askNova(cmd);
         }
     } catch (error) {
         window.novaState.isProcessingCommand = false;
         console.error('interpretation error:', error);
         // If it was a search/play, don't fallback to chat, just reset
         if (!cmd.match(/\b(search|play)\b/i)) {
-            await askGrokRealtime(cmd);
+            await askNova(cmd);
         }
     }
-    
+
     subtitleElement.innerText = "";
     subtitleElement.style.color = '#fff';
     listeningSymbol.style.display = 'none';

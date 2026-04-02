@@ -4,10 +4,10 @@
   "description": "Sci-fi worker robot desktop widget",
   "main": "main.js",
   "scripts": {
-    "start": "electron . --no-sandbox --disable-gpu-sandbox --enable-transparent-visuals --enable-logging",
-    "postinstall": "node scripts/download-piper.js"
+    "start": "electron . --no-sandbox --disable-gpu-sandbox --enable-transparent-visuals --enable-logging"
   },
   "dependencies": {
+    "@google/genai": "^1.48.0",
     "dotenv": "^17.3.1",
     "three": "^0.163.0",
     "vosk-browser": "^0.0.8"

@@ -1,60 +1,55 @@
-const fs = require('fs');
+require('dotenv').config();
+const { GoogleGenAI } = require('@google/genai');
 const path = require('path');
 const os = require('os');
+const fs = require('fs');
+
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 /**
- * Transcribe audio buffer using OpenAI Whisper
+ * Transcribe audio buffer using Gemini.
  * @param {Buffer} audioBuffer - The raw audio data (WebM/Ogg from MediaRecorder)
  * @returns {Promise<string>} - The transcribed text
  */
 async function transcribeAudio(audioBuffer) {
-    const API_KEY = process.env.OPENAI_API_KEY;
-    if (!API_KEY) {
-        throw new Error("OPENAI_API_KEY not found in environment.");
+    if (!process.env.GEMINI_API_KEY) {
+        throw new Error('GEMINI_API_KEY not found in environment.');
     }
 
-    const tempPath = path.join(os.tmpdir(), `nova_audio_${Date.now()}.webm`);
-    
+    const base64Audio = audioBuffer.toString('base64');
+
     try {
-        // Write buffer to temp file
-        fs.writeFileSync(tempPath, audioBuffer);
+        console.log('🎙️ Sending audio to Gemini for transcription...');
 
-        // Prepare multi-part form data manually for Whisper API
-        const formData = new FormData();
-        const blob = new Blob([audioBuffer], { type: 'audio/webm' });
-        
-        formData.append('file', blob, 'audio.webm');
-        formData.append('model', 'whisper-1');
-        formData.append('language', 'en');
-
-        console.log('🎙️ Sending audio to Whisper API...');
-        const response = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${API_KEY}`
-            },
-            body: formData
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.0-flash',
+            contents: [
+                {
+                    parts: [
+                        {
+                            inlineData: {
+                                mimeType: 'audio/webm',
+                                data: base64Audio,
+                            },
+                        },
+                        {
+                            text: 'Please transcribe this audio accurately. Return only the spoken words with no extra commentary.',
+                        },
+                    ],
+                },
+            ],
         });
 
-        if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(`Whisper API Error (${response.status}): ${errText}`);
-        }
-
-        const data = await response.json();
-        const transcription = data.text || '';
-        console.log('✅ Whisper Transcription:', transcription);
-        
-        return transcription.trim();
-
+        const transcription = response.text?.trim() || '';
+        console.log('✅ Gemini Transcription:', transcription);
+        return transcription;
     } catch (error) {
-        console.error('❌ Transcription Failed:', error);
-        throw error;
-    } finally {
-        // Clean up temp file
-        if (fs.existsSync(tempPath)) {
-            try { fs.unlinkSync(tempPath); } catch (e) {}
+        if (error.status === 400) {
+            console.log('⚠️ Gemini 400 error (likely purely silent audio chunk). Returning empty string.');
+            return '';
         }
+        console.error('❌ Gemini Transcription Failed:', error);
+        throw error;
     }
 }
 

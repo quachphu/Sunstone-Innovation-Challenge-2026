@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <style>
-        body, html {
+        body,
+        html {
             margin: 0;
             padding: 0;
             height: 100%;
@@ -10,6 +12,7 @@
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
             background: #0a0a0f;
         }
+
         #browser-header {
             height: 40px;
             background: rgba(15, 15, 25, 0.8);
@@ -23,6 +26,7 @@
             font-weight: 500;
             letter-spacing: 0.5px;
         }
+
         #status-dot {
             width: 8px;
             height: 8px;
@@ -32,20 +36,33 @@
             box-shadow: 0 0 10px #0ff;
             animation: pulse 2s infinite;
         }
+
         @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; transform: scale(1.1); }
-            100% { opacity: 0.6; }
+            0% {
+                opacity: 0.6;
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.1);
+            }
+
+            100% {
+                opacity: 0.6;
+            }
         }
+
         #browser-container {
             height: calc(100% - 40px);
             width: 100%;
         }
+
         webview {
             width: 100%;
             height: 100%;
             background: #fff;
         }
+
         #url-display {
             opacity: 0.6;
             font-size: 11px;
@@ -53,6 +70,7 @@
         }
     </style>
 </head>
+
 <body>
     <div id="browser-header">
         <div id="status-dot"></div>
@@ -169,15 +187,38 @@
             const escapedText = JSON.stringify(targetText);
             webview.executeJavaScript(`
                 (function() {
-                    const lowerText = ${escapedText}.toLowerCase();
-                    const elements = Array.from(document.querySelectorAll('button, a, input, [role="button"], [onclick], h3, .ytp-ad-skip-button, ytd-thumbnail, ytd-video-renderer'));
+                    const lowerText = ${escapedText}.toLowerCase().trim();
+                    // Include more tags for search on complex sites
+                    const elements = Array.from(document.querySelectorAll('button, a, input, [role="button"], [onclick], h3, .ytp-ad-skip-button, ytd-thumbnail, ytd-video-renderer, ytd-grid-video-renderer, span, div, img'));
+                    
                     const match = elements.find(el => {
-                        const t = (el.innerText || el.title || el.ariaLabel || "").toLowerCase();
-                        return t === lowerText || (t.includes(lowerText) && t.length < 50);
+                        const t = (el.innerText || el.title || el.ariaLabel || el.alt || "").toLowerCase().trim();
+                        // Priority 1: Exact match
+                        if (t === lowerText) return true;
+                        // Priority 2: Title contains target and is short (likely a button/link)
+                        if (t.includes(lowerText) && t.length < 100) return true;
+                        return false;
                     });
+
                     if (match) {
-                        match.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        match.click();
+                        // Click the element or its nearest interactive parent
+                        const clickTarget = match.closest('a, button, [role="button"]') || match;
+                        console.log('🎯 Smart-Click Match Found:', clickTarget.tagName);
+                        
+                        // Flash the element briefly
+                        const oldOutline = clickTarget.style.outline;
+                        clickTarget.style.outline = '3px solid #0ff';
+                        setTimeout(() => clickTarget.style.outline = oldOutline, 500);
+
+                        clickTarget.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        
+                        // Execute click with longer delay for scroll settling
+                        setTimeout(() => {
+                            clickTarget.click();
+                            // Fallback Dispatch
+                            const evt = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
+                            clickTarget.dispatchEvent(evt);
+                        }, 500);
                         return true;
                     }
                     return false;
@@ -186,4 +227,5 @@
         });
     </script>
 </body>
+
 </html>
